@@ -15,7 +15,7 @@ With Nette `2.3` and newer, you can enable the extension using your neon config.
 
 ```yml
 extensions:
-	editrouble: FreezyBee\Editrouble\EditroubleExtension
+	editrouble: FreezyBee\Editrouble\DI\EditroubleExtension
 ```
 
 Minimal configuration

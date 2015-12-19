@@ -31,16 +31,15 @@ class Macros extends MacroSet
      */
     public function macroEditrouble(MacroNode $node, PhpWriter $writer)
     {
-        dump($node->tokenizer);
-
         $name = $node->tokenizer->fetchWord();
 
         if ($name === false) {
             throw new CompileException("Missing editrouble name in {{$node->name}}.");
         }
 
-        $attrs = " data-editrouble='\" . json_encode([" . $writer->write('%node.args') .
-            ", 'name' => '" . $name . "']) . \"'";
+        $args = $writer->write('%node.args');
+        $attrs = " data-editrouble='\" . json_encode([" . ($args ? $args . ',' : '') .
+            "'name' => '" . $name . "']) . \"'";
 
         preg_match('#(^.*?>)(.*)(<.*\z)#s', $node->content, $parts);
 

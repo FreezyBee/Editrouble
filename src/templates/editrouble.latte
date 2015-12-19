@@ -23,72 +23,77 @@
                     }
                 });
 
-                // register listener
-                editor.subscribe('editableInput', function (data, editable) {
-                    var data = $(editable).data('editrouble');
-                    $('#editrouble-btn-save').show();
-                    if (editedItems.indexOf(data.name) < 0) {
-                        editedItems.push(data.name);
-                    }
-                });
+                if (editor.elements.length) {
+                    // register listener
+                    editor.subscribe('editableInput', function (data, editable) {
+                        var data = $(editable).data('editrouble');
+                        $('#editrouble-btn-save').show();
+                        if (editedItems.indexOf(data.name) < 0) {
+                            editedItems.push(data.name);
+                        }
+                    });
+                }
             }
 
             function init() {
                 var htmlBtns =
-                        '<a href="#" id="editrouble-btn-save" class="editrouble-btn" onclick="editrouble.save()"><i class="fa fa-save fa-fw"></i></a>' +
-                        '<a href="#" id="editrouble-btn-show" class="editrouble-btn" onclick="editrouble.show()"><i class="fa fa-edit fa-fw"></i></a>';
+                        '<a href="#" id="editrouble-btn-save" class="editrouble-btn"><i class="fa fa-save fa-fw"></i></a>' +
+                        '<a href="#" id="editrouble-btn-show" class="editrouble-btn"><i class="fa fa-edit fa-fw"></i></a>';
                 $('body').append(htmlBtns);
-            }
 
-            this.show = function () {
-                if (active) {
-                    $('.editrouble').removeClass('editrouble active');
-                    $('#editrouble-btn-show').removeClass('active');
-                    active = false;
-                } else {
-                    $('[data-editrouble]').addClass('editrouble active');
-                    $('#editrouble-btn-show').addClass('active');
-                    initEditor();
-                    active = true;
-                }
+                $('#editrouble-btn-show').click(function (e) {
+                    e.preventDefault();
 
-                return false;
-            }
-
-            this.save = function () {
-                var data = {};
-
-                $('.editrouble').each(function () {
-                    var el = $(this);
-                    var d = el.data('editrouble');
-
-                    if (editedItems.indexOf(d.name) >= 0) {
-                        d.content = el.html().replace(/ +(?= )/g, '');
-                        data[d.name] = d;
+                    if (active) {
+                        $('.editrouble').removeClass('editrouble active');
+                        $('#editrouble-btn-show').removeClass('active');
+                        active = false;
+                    } else {
+                        $('[data-editrouble]').addClass('editrouble active');
+                        $('#editrouble-btn-show').addClass('active');
+                        initEditor();
+                        active = true;
                     }
+
+                    return false;
                 });
 
-                if (!$.isEmptyObject(data)) {
-                    $.ajax({
-                        type: 'POST',
-                        url: {link save!},
-                        data: data,
-                        success: function (data) {
-                            if (data.status == -1) {
-                                alert('Došlo k chybě');
-                            } else {
-                                $('#editrouble-btn-save').hide();
-                                editedItems = [];
-                                alert('Uloženo');
-                            }
+                $('#editrouble-btn-save').click(function (e) {
+                    e.preventDefault();
+                    var data = {};
+
+                    $('.editrouble').each(function () {
+                        var el = $(this);
+                        var d = el.data('editrouble');
+
+                        if (editedItems.indexOf(d.name) >= 0) {
+                            d.content = el.html().replace(/ +(?= )/g, '');
+                            data[d.name] = d;
                         }
                     });
-                } else {
-                    alert('Žádně změny k uložení');
-                }
 
-                return false;
-            };
+                    if (!$.isEmptyObject(data)) {
+                        $.ajax({
+                            type: 'POST',
+                            url: {link save!},
+                            data: data,
+                            success: function (data) {
+                                if (data.status == -1) {
+                                    alert('Došlo k chybě');
+                                } else {
+                                    $('#editrouble-btn-save').hide();
+                                    editedItems = [];
+                                    alert('Uloženo');
+                                }
+                            }
+                        });
+                    } else {
+                        alert('Žádně změny k uložení');
+                    }
+
+                    return false;
+                });
+            }
 
             init();
         }

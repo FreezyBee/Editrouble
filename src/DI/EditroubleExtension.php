@@ -70,9 +70,10 @@ class EditroubleExtension extends CompilerExtension
         parent::afterCompile($class);
 
         // TODO
-        if ($this->config['storage'] == 'doctrine' && 0) {
+        if ($this->config['storage'] == 'doctrine') {
             /** @var \Nette\PhpGenerator\Method $mappingDriver */
-            $mappingDriver = $class->getMethod('createServiceDoctrine__default__driver__Kdyby_Doctrine__annotationsImpl');
+            $mappingDriver = $class
+                ->getMethod('createServiceDoctrine__default__driver__Kdyby_Doctrine__annotationsImpl');
 
             $oldBody = $mappingDriver->getBody();
             $newBody = substr_replace(
