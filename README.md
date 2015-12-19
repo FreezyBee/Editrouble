@@ -1,7 +1,7 @@
 FreezyBee/Editrouble
 ======
 
-Editrouble extension for Nette Framework.
+Editrouble = Content editable extension for Nette Framework.
 
 
 Requirements
