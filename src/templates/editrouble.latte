@@ -47,6 +47,10 @@
                     if (active) {
                         $('.editrouble').removeClass('editrouble active');
                         $('#editrouble-btn-show').removeClass('active');
+                        if (editor) {
+                            editor.destroy();
+                            editor = false;
+                        }
                         active = false;
                     } else {
                         $('[data-editrouble]').addClass('editrouble active');

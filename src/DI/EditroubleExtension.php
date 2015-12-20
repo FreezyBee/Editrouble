@@ -60,29 +60,22 @@ class EditroubleExtension extends CompilerExtension
             ->setClass('FreezyBee\Editrouble\Connector')
             ->setArguments([$storage, $config]);
 
-    }
 
-    /**
-     * @param Nette\PhpGenerator\ClassType $class
-     */
-    public function afterCompile(Nette\PhpGenerator\ClassType $class)
-    {
-        parent::afterCompile($class);
+        if ($config['storage'] == 'doctrine') {
+            $serviceName = 'doctrine.default.driver.FreezyBee.annotationsImpl';
 
-        // TODO
-        if ($this->config['storage'] == 'doctrine') {
-            /** @var \Nette\PhpGenerator\Method $mappingDriver */
-            $mappingDriver = $class
-                ->getMethod('createServiceDoctrine__default__driver__Kdyby_Doctrine__annotationsImpl');
+            $builder->addDefinition($serviceName)
+                ->setClass('Doctrine\Common\Persistence\Mapping\Driver\MappingDriver')
+                ->setFactory('Kdyby\Doctrine\Mapping\AnnotationDriver', [
+                    [__DIR__ . '/../Storage'],
+                    '@annotations.reader',
+                    '@doctrine.cache.default.metadata'
+                ])
+                ->setAutowired(false)
+                ->setInject(false);
 
-            $oldBody = $mappingDriver->getBody();
-            $newBody = substr_replace(
-                $oldBody,
-                '\'' . __DIR__ . '/../Storage\'',
-                strrpos($oldBody, 'Entities\',') + strlen('Entities\','),
-                0
-            );
-            $mappingDriver->setBody($newBody);
+            $builder->getDefinition('doctrine.default.metadataDriver')
+                ->addSetup('addDriver', ['@' . $serviceName, 'FreezyBee\Editrouble\Storage']);
         }
     }
 }

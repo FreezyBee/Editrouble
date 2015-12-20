@@ -11,7 +11,14 @@
     height: 32px;
     z-index: 100000;
     text-align: center;
+}
+
+a.editrouble-btn {
     color: white;
+}
+
+a:hover.editrouble-btn {
+    color: #eee;
 }
 
 .editrouble-btn i {
