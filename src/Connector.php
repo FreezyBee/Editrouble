@@ -28,6 +28,11 @@ class Connector extends Object
     private $config;
 
     /**
+     * @var string
+     */
+    private $locale;
+
+    /**
      * Connector constructor.
      * @param IStorage $storage
      * @param array $config
@@ -44,6 +49,22 @@ class Connector extends Object
     public function setPresenter(Presenter $presenter)
     {
         $this->presenter = $presenter;
+    }
+
+    /**
+     * @param $locale
+     */
+    public function setLocale($locale)
+    {
+        $this->locale = $locale;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLocale()
+    {
+        return $this->locale;
     }
 
     /**
@@ -69,6 +90,10 @@ class Connector extends Object
      */
     public function getContent($name, array $params = [])
     {
+        if ($this->locale && !isset($params['locale'])) {
+            $params['locale'] = $this->locale;
+        }
+
         return $this->storage->getContent($name, $params);
     }
 

@@ -43,8 +43,13 @@ class Editrouble extends Control
         if ($this->connector->checkPermission()) {
             $request = $this->getPresenter()->getRequest();
             $post = $request->getPost();
+            $locale = $this->connector->getLocale();
 
             foreach ($post as $name => $item) {
+                if ($locale && !isset($item['locale'])) {
+                    $item['locale'] = $locale;
+                }
+
                 $this->storage->saveContent($name, $item);
             }
             $presenter->sendJson(['status' => 0]);
