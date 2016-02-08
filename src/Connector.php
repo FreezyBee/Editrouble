@@ -77,6 +77,12 @@ class Connector extends Object
      */
     public function checkPermission()
     {
-        return $this->presenter->user->isInRole('editor');
+        foreach ($this->presenter->user->getRoles() as $role) {
+            if (in_array($role, $this->config['roles'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

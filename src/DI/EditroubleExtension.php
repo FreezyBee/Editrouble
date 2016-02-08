@@ -18,6 +18,9 @@ class EditroubleExtension extends CompilerExtension
      */
     private $defaults = [
         'storage' => null,
+        'roles' => [
+            'editor'
+        ],
         'webPaths' => [
             'js' => null,
             'css' => null
@@ -30,7 +33,7 @@ class EditroubleExtension extends CompilerExtension
     private static $allowedStorages = [
         'doctrine',
 //        'ndb',
-//        'dibi'
+        'dibi'
     ];
 
     /**
@@ -46,6 +49,8 @@ class EditroubleExtension extends CompilerExtension
             throw new AssertionException('Editrouble - invalid storage - it must be (' .
                 implode(' OR ', self::$allowedStorages) . ')');
         }
+
+        Validators::assert($config['roles'], 'array', 'Editrouble - invalid roles');
 
         $builder = $this->getContainerBuilder();
         $builder->getDefinition('nette.latteFactory')
@@ -76,6 +81,9 @@ class EditroubleExtension extends CompilerExtension
 
             $builder->getDefinition('doctrine.default.metadataDriver')
                 ->addSetup('addDriver', ['@' . $serviceName, 'FreezyBee\Editrouble\Storage']);
+
+        } elseif ($config['storage'] == 'dibi') {
+            // TODO ?
         }
     }
 }

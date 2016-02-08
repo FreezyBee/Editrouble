@@ -1,4 +1,4 @@
-{if $user->isInRole('editor')}
+{if $userHasPermission}
     <script src="{if $paths->js}{$paths->js}{else}{$basePath}/medium-editor.min.js{/if}"></script>
     <script>
         var editrouble;

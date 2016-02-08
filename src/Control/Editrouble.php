@@ -6,6 +6,7 @@ use FreezyBee\Editrouble\Connector;
 use FreezyBee\Editrouble\Storage\IStorage;
 use Nette\Application\UI\Control;
 use Nette\ComponentModel\IContainer;
+use Nette\Security\User;
 
 /**
  * Class Editrouble
@@ -39,7 +40,7 @@ class Editrouble extends Control
     {
         $presenter = $this->getPresenter();
 
-        if ($presenter->user->isInRole('editor')) {
+        if ($this->connector->checkPermission()) {
             $request = $this->getPresenter()->getRequest();
             $post = $request->getPost();
 
@@ -61,6 +62,7 @@ class Editrouble extends Control
         $config = $this->connector->getConfig();
 
         $this->template->paths = (object) $config['webPaths'];
+        $this->template->userHasPermission = $this->connector->checkPermission();
         $this->template->setFile(__DIR__ . '/../templates/editrouble.latte');
         $this->template->render();
     }
