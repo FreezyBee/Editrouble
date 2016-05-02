@@ -4,13 +4,11 @@ namespace FreezyBee\Editrouble\Control;
 
 use FreezyBee\Editrouble\Connector;
 use FreezyBee\Editrouble\Storage\IStorage;
-use Nette\Application\BadRequestException;
 use Nette\Application\Responses\CallbackResponse;
 use Nette\Application\UI\Control;
 use Nette\ComponentModel\IContainer;
 use Nette\Http\Request;
 use Nette\Http\Response;
-use Nette\Security\User;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
 
@@ -66,7 +64,7 @@ class Editrouble extends Control
 
                 $this->storage->saveContent($name, $item);
             }
-            $this->presenter->sendPayload();
+            $this->sendResponse();
 
         } else {
             $this->sendResponse(403);
@@ -77,7 +75,7 @@ class Editrouble extends Control
      * @param int $code
      * @param string $data
      */
-    private function sendResponse($code = 201, $data = '')
+    private function sendResponse($code = 200, $data = '')
     {
         $this->presenter->sendResponse(
             new CallbackResponse(function (Request $request, Response $response) use ($code, $data) {
