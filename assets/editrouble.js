@@ -49,7 +49,7 @@ function Editrouble(link) {
         if (editor.elements.length) {
             // register listener
             editor.subscribe('editableInput', function (e) {
-                var data = JSON.parse(e.originalTarget.getAttribute('data-editrouble'));
+                var data = JSON.parse(e.target.getAttribute('data-editrouble'));
                 show(saveBtn);
                 if (editedItems.indexOf(data.name) < 0) {
                     editedItems.push(data.name);
