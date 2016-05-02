@@ -108,7 +108,7 @@ class Dibi extends BaseStorage implements IStorage
     public function saveContent($name, $params)
     {
         $names = $this->decodeNames($name);
-        $locale = (isset($params['locale'])) ? $params['locale'] : '';
+        $locale = (isset($params->locale)) ? $params->locale : '';
 
         $rowId = $this->connection
             ->select('id')
@@ -120,7 +120,7 @@ class Dibi extends BaseStorage implements IStorage
             ])
             ->fetchSingle();
 
-        $content = isset($params['content']) ? $params['content'] : '';
+        $content = isset($params->content) ? $params->content : '';
 
         if ($rowId) {
             // update

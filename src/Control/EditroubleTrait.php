@@ -3,6 +3,7 @@
 namespace FreezyBee\Editrouble\Control;
 
 use FreezyBee\Editrouble\Connector;
+use Nette\Http\Request;
 
 /**
  * Class EditroubleTrait
@@ -13,6 +14,9 @@ trait EditroubleTrait
     /** @var Connector */
     public $editroubleConnector;
 
+    /** @var Request @inject */
+    public $rawRequest;
+    
     /**
      * @param Connector $connector
      */
@@ -28,7 +32,7 @@ trait EditroubleTrait
      */
     protected function createComponentEditrouble($name)
     {
-        $control = new Editrouble($this, $name, $this->editroubleConnector);
+        $control = new Editrouble($this, $name, $this->editroubleConnector, $this->rawRequest);
         return $control;
     }
 }

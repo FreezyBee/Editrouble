@@ -4,9 +4,15 @@ namespace FreezyBee\Editrouble\Control;
 
 use FreezyBee\Editrouble\Connector;
 use FreezyBee\Editrouble\Storage\IStorage;
+use Nette\Application\BadRequestException;
+use Nette\Application\Responses\CallbackResponse;
 use Nette\Application\UI\Control;
 use Nette\ComponentModel\IContainer;
+use Nette\Http\Request;
+use Nette\Http\Response;
 use Nette\Security\User;
+use Nette\Utils\Json;
+use Nette\Utils\JsonException;
 
 /**
  * Class Editrouble
@@ -20,17 +26,21 @@ class Editrouble extends Control
     /** @var IStorage */
     private $storage;
 
+    /** @var Request */
+    private $request;
+
     /**
      * Editrouble constructor.
      * @param IContainer $parent
      * @param string $name
      * @param Connector $connector
      */
-    public function __construct(IContainer $parent, $name, Connector $connector)
+    public function __construct(IContainer $parent, $name, Connector $connector, Request $request)
     {
         parent::__construct($parent, $name);
         $this->connector = $connector;
         $this->storage = $connector->getStorage();
+        $this->request = $request;
     }
 
     /**
@@ -38,25 +48,47 @@ class Editrouble extends Control
      */
     public function handleSave()
     {
-        $presenter = $this->getPresenter();
-
         if ($this->connector->checkPermission()) {
-            $request = $this->getPresenter()->getRequest();
-            $post = $request->getPost();
+            $post = $this->request->getRawBody();
             $locale = $this->connector->getLocale();
 
-            foreach ($post as $name => $item) {
-                if ($locale && !isset($item['locale'])) {
-                    $item['locale'] = $locale;
+            try {
+                $json = Json::decode($post);
+            } catch (JsonException $e) {
+                $this->sendResponse(400, 'invalid json');
+                return;
+            }
+
+            foreach ($json as $name => $item) {
+                if ($locale && !isset($item->locale)) {
+                    $item->locale = $locale;
                 }
 
                 $this->storage->saveContent($name, $item);
             }
-            $presenter->sendJson(['status' => 0]);
+            $this->presenter->sendPayload();
 
         } else {
-            $presenter->sendJson(['status' => -1]);
+            $this->sendResponse(403);
         }
+    }
+
+    /**
+     * @param int $code
+     * @param string $data
+     */
+    private function sendResponse($code = 201, $data = '')
+    {
+        $this->presenter->sendResponse(
+            new CallbackResponse(function (Request $request, Response $response) use ($code, $data) {
+                $response->setCode($code);
+                if ($data) {
+                    echo $data;
+                }
+            })
+        );
+
+        $this->presenter->terminate();
     }
 
     /**
@@ -66,7 +98,7 @@ class Editrouble extends Control
     {
         $config = $this->connector->getConfig();
 
-        $this->template->paths = (object) $config['webPaths'];
+        $this->template->paths = (object)$config['webPaths'];
         $this->template->userHasPermission = $this->connector->checkPermission();
         $this->template->setFile(__DIR__ . '/../templates/editrouble.latte');
         $this->template->render();

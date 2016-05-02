@@ -112,10 +112,10 @@ class Doctrine extends BaseStorage implements IStorage
     public function saveContent($name, $params)
     {
         $names = $this->decodeNames($name);
-        $locale = (isset($params['locale'])) ? $params['locale'] : '';
+        $locale = (isset($params->locale)) ? $params->locale : '';
 
         $entity = $this->findContentEntity($names->namespace, $names->name, $locale);
-        $content = isset($params['content']) ? $params['content'] : '';
+        $content = isset($params->content) ? $params->content : '';
 
         if ($entity) {
             // update

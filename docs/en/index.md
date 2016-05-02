@@ -23,10 +23,10 @@ Minimal configuration
 
 ```yml
 editrouble:
-    storage: doctrine # [doctrine, ndb, dibi]
+    storage: doctrine # [doctrine, dibi]
     webPaths:
-        js: 'pathTo medium-editor.min.jss'
-        css: 'pathTo medium-editor.min.css'
+        js: 'pathTo editrouble.jss'
+        css: 'pathTo editrouble.css'
 ```
 
 Example
@@ -43,11 +43,6 @@ class BasePresenter extends Presenter
 ```
 
 ```smarty
-<head>
-    <!-- used for toolbar layout -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-</head>
-
 <body>
     <div n:editrouble="namespace_item-key">
     </div>
