@@ -60,8 +60,8 @@ function Editrouble(link) {
 
     function init() {
         document.body.innerHTML +=
-            '<a href="#" id="editrouble-btn-save" class="editrouble-btn">&#10003;</a>' +
-            '<a href="#" id="editrouble-btn-show" class="editrouble-btn">&#9998;</a>';
+            '<button id="editrouble-btn-save" class="editrouble-btn">&#10003;</button>' +
+            '<button id="editrouble-btn-show" class="editrouble-btn">&#9998;</button>';
 
         showBtn = document.getElementById('editrouble-btn-show');
         showBtn.addEventListener('click', function () {
