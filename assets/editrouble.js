@@ -59,11 +59,18 @@ function Editrouble(link) {
     }
 
     function init() {
-        document.body.innerHTML +=
-            '<button id="editrouble-btn-save" class="editrouble-btn">&#10003;</button>' +
-            '<button id="editrouble-btn-show" class="editrouble-btn">&#9998;</button>';
+        showBtn = document.createElement("button");
+        showBtn.id = 'editrouble-btn-show';
+        showBtn.className = 'editrouble-btn';
+        showBtn.innerHTML = '&#9998;';
+        document.body.appendChild(showBtn);
 
-        showBtn = document.getElementById('editrouble-btn-show');
+        saveBtn = document.createElement("button");
+        saveBtn.id = 'editrouble-btn-save';
+        saveBtn.className = 'editrouble-btn';
+        saveBtn.innerHTML = '&#10003;';
+        document.body.appendChild(saveBtn);
+
         showBtn.addEventListener('click', function () {
             if (active) {
                 var items = document.querySelectorAll('.editrouble');
@@ -86,11 +93,8 @@ function Editrouble(link) {
                 initEditor();
                 active = true;
             }
-
-            return false;
         });
 
-        saveBtn = document.getElementById('editrouble-btn-save');
         saveBtn.addEventListener('click', function () {
             var data = new Object();
 
@@ -123,8 +127,6 @@ function Editrouble(link) {
             } else {
                 alert('Žádně změny k uložení');
             }
-
-            return false;
         });
     }
 
