@@ -39,7 +39,7 @@ class Macros extends MacroSet
 
         $args = $writer->write('%node.args');
         $attrs = " data-editrouble='\" . json_encode([" . ($args ? $args . ',' : '') .
-            "'name' => '" . $name . "']) . \"'";
+            "'name' => \"" . $name . "\"]) . \"'";
 
         preg_match('#(^.*?>)(.*)(<.*\z)#s', $node->content, $parts);
 
