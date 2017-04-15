@@ -2,16 +2,21 @@
 
 namespace FreezyBee\Editrouble\DI;
 
-use Nette;
+use Kdyby\Doctrine\DI\IEntityProvider;
 use Nette\DI\CompilerExtension;
 use Nette\Utils\AssertionException;
 use Nette\Utils\Validators;
+use FreezyBee\Editrouble\Connector;
+
+if (!interface_exists('Kdyby\Doctrine\DI\IEntityProvider')) {
+    class_alias('FreezyBee\Editrouble\DI\IFakeEntityProvider', 'Kdyby\Doctrine\DI\IEntityProvider');
+}
 
 /**
  * Class EditroubleExtension
  * @package FreezyBee\MailChimp\DI
  */
-class EditroubleExtension extends CompilerExtension
+class EditroubleExtension extends CompilerExtension implements IEntityProvider
 {
     /**
      * @var array
@@ -45,7 +50,7 @@ class EditroubleExtension extends CompilerExtension
 
         Validators::assert($config['storage'], 'string', 'Editrouble - missing storage');
 
-        if (!in_array($config['storage'], self::$allowedStorages)) {
+        if (!in_array($config['storage'], self::$allowedStorages, true)) {
             throw new AssertionException('Editrouble - invalid storage - it must be (' .
                 implode(' OR ', self::$allowedStorages) . ')');
         }
@@ -62,28 +67,16 @@ class EditroubleExtension extends CompilerExtension
             ->setClass('FreezyBee\Editrouble\Storage\\' . ucfirst($config['storage']));
 
         $builder->addDefinition($this->prefix('connector'))
-            ->setClass('FreezyBee\Editrouble\Connector')
+            ->setClass(Connector::class)
             ->setArguments([$storage, $config]);
+    }
 
-
-        if ($config['storage'] == 'doctrine') {
-            $serviceName = 'doctrine.default.driver.FreezyBee.annotationsImpl';
-
-            $builder->addDefinition($serviceName)
-                ->setClass('Doctrine\Common\Persistence\Mapping\Driver\MappingDriver')
-                ->setFactory('Kdyby\Doctrine\Mapping\AnnotationDriver', [
-                    [__DIR__ . '/../Storage'],
-                    '@annotations.reader',
-                    '@doctrine.cache.default.metadata'
-                ])
-                ->setAutowired(false)
-                ->setInject(false);
-
-            $builder->getDefinition('doctrine.default.metadataDriver')
-                ->addSetup('addDriver', ['@' . $serviceName, 'FreezyBee\Editrouble\Storage']);
-
-        } elseif ($config['storage'] == 'dibi') {
-            // TODO ?
-        }
+    /**
+     * Returns associative array of Namespace => mapping definition
+     * @return array
+     */
+    public function getEntityMappings()
+    {
+        return ['FreezyBee\Editrouble\Storage' => __DIR__ . '/../Storage/'];
     }
 }
