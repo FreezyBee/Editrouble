@@ -4,14 +4,16 @@ namespace FreezyBee\Editrouble;
 
 use FreezyBee\Editrouble\Storage\IStorage;
 use Nette\Application\UI\Presenter;
-use Nette\Object;
+use Nette\SmartObject;
 
 /**
  * Class Connector
  * @package FreezyBee\Editrouble
  */
-class Connector extends Object
+class Connector
 {
+    use SmartObject;
+
     /**
      * @var IStorage
      */

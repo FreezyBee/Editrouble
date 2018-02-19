@@ -2,17 +2,18 @@
 
 namespace FreezyBee\Editrouble\Storage;
 
-use Doctrine\ORM\Query;
 use Nette\Caching\Cache;
 use Nette\Caching\IStorage;
-use Nette\Object;
+use Nette\SmartObject;
 
 /**
  * Class BaseStorage
  * @package FreezyBee\Editrouble\Storage
  */
-abstract class BaseStorage extends Object
+abstract class BaseStorage
 {
+    use SmartObject;
+
     /**
      * @var Cache
      */
