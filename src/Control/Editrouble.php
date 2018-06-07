@@ -28,14 +28,14 @@ class Editrouble extends Control
     private $request;
 
     /**
-     * Editrouble constructor.
      * @param IContainer $parent
      * @param string $name
      * @param Connector $connector
+     * @param Request $request
      */
     public function __construct(IContainer $parent, $name, Connector $connector, Request $request)
     {
-        parent::__construct($parent, $name);
+        parent::__construct();
         $this->connector = $connector;
         $this->storage = $connector->getStorage();
         $this->request = $request;
