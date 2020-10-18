@@ -2,22 +2,15 @@
 
 namespace FreezyBee\Editrouble\Storage;
 
-/**
- * Interface IStorage
- * @package FreezyBee\Editrouble\Storage
- */
 interface IStorage
 {
     /**
-     * @param $name
-     * @param $params
-     * @return mixed
+     * @param mixed[] $params
      */
-    public function getContent($name, $params);
+    public function getContent(string $name, array $params): string;
 
     /**
-     * @param $name
-     * @param $params
+     * @param mixed[] $params
      */
-    public function saveContent($name, $params);
+    public function saveContent(string $name, array $params): void;
 }

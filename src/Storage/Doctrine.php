@@ -2,58 +2,30 @@
 
 namespace FreezyBee\Editrouble\Storage;
 
-use Doctrine\ORM\Query;
-use Kdyby\Doctrine\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Nette\Caching;
 
-/**
- * Class Doctrine
- * @package FreezyBee\Editrouble\Storage
- */
 class Doctrine extends BaseStorage implements IStorage
 {
-    /**
-     * @var EntityManager
-     */
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
-    /**
-     * Doctrine constructor.
-     * @param Caching\IStorage $storage
-     * @param EntityManager $entityManager
-     */
-    public function __construct(Caching\IStorage $storage, EntityManager $entityManager)
+    public function __construct(Caching\IStorage $storage, EntityManagerInterface $entityManager)
     {
         parent::__construct($storage);
         $this->entityManager = $entityManager;
     }
 
-    /**
-     * @param $name
-     * @param $params
-     * @return string|false
-     */
-    public function getContent($name, $params)
+    public function getContent(string $name, array $params): string
     {
         $names = $this->decodeNames($name);
-        $locale = (isset($params['locale'])) ? $params['locale'] : '';
+        $locale = $params['locale'] ?? '';
 
         $records = $this->loadCachedNamespace($names->namespace);
 
-        if (isset($records[$names->namespace][$names->name][$locale])) {
-            return $records[$names->namespace][$names->name][$locale];
-        } else {
-            return $this->findContentAndFillCache($names->namespace, $names->name, $locale);
-        }
+        return $records[$names->namespace][$names->name][$locale] ?? $this->findContentAndFillCache($names->namespace, $names->name, $locale);
     }
 
-    /**
-     * @param $namespace
-     * @param $name
-     * @param $locale
-     * @return string
-     */
-    private function findContentAndFillCache($namespace, $name, $locale)
+    private function findContentAndFillCache(string $namespace, string $name, string $locale): string
     {
         /** @var DoctrineEntity[] $result */
         $result = $this->entityManager->createQueryBuilder()
@@ -78,18 +50,11 @@ class Doctrine extends BaseStorage implements IStorage
 
         $this->saveCachedNamespace($namespace, $tmp);
 
-        return isset($tmp[$namespace][$name][$locale]) ? $tmp[$namespace][$name][$locale] : '';
+        return $tmp[$namespace][$name][$locale] ?? '';
     }
 
-    /**
-     * @param $namespace
-     * @param $name
-     * @param $locale
-     * @return DoctrineEntity
-     */
-    private function findContentEntity($namespace, $name, $locale)
+    private function findContentEntity(string $namespace, string $name, string $locale): ?DoctrineEntity
     {
-        /** @var DoctrineEntity[] $result */
         return $this->entityManager->createQueryBuilder()
             ->select('c')
             ->from(DoctrineEntity::class, 'c')
@@ -105,17 +70,13 @@ class Doctrine extends BaseStorage implements IStorage
             ->getOneOrNullResult();
     }
 
-    /**
-     * @param $name
-     * @param $params
-     */
-    public function saveContent($name, $params)
+    public function saveContent(string $name, array $params): void
     {
         $names = $this->decodeNames($name);
-        $locale = (isset($params->locale)) ? $params->locale : '';
+        $locale = $params['locale'] ?? '';
 
         $entity = $this->findContentEntity($names->namespace, $names->name, $locale);
-        $content = isset($params->content) ? $params->content : '';
+        $content = $params['content'] ?? '';
 
         if ($entity) {
             // update
@@ -133,6 +94,7 @@ class Doctrine extends BaseStorage implements IStorage
 
         $this->findContentAndFillCache($names->namespace, '', '');
 
-        $this->entityManager->persist($entity)->flush();
+        $this->entityManager->persist($entity);
+        $this->entityManager->flush();
     }
 }

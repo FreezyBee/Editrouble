@@ -3,7 +3,6 @@
 namespace FreezyBee\Editrouble\Storage;
 
 use Doctrine\ORM\Mapping as ORM;
-use Kdyby\Doctrine\Entities\Attributes\Identifier;
 
 /**
  * @ORM\Entity
@@ -12,40 +11,35 @@ use Kdyby\Doctrine\Entities\Attributes\Identifier;
  */
 class DoctrineEntity
 {
-    use Identifier;
+    /**
+     * @var int
+     * @ORM\Column(type="integer")
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     */
+    private int $id = 0;
 
     /**
-     * @var string
      * @ORM\Column(type="string")
      */
-    private $namespace;
+    private string $namespace;
 
     /**
-     * @var string
      * @ORM\Column(type="string")
      */
-    private $name;
+    private string $name;
 
     /**
-     * @var string
      * @ORM\Column(type="string")
      */
-    private $locale;
+    private string $locale;
 
     /**
-     * @var string
      * @ORM\Column(type="text")
      */
-    private $content;
+    private string $content;
 
-    /**
-     * DoctrineEntity constructor.
-     * @param $namespace
-     * @param $name
-     * @param $locale
-     * @param $content
-     */
-    public function __construct($namespace, $name, $locale, $content)
+    public function __construct(string $namespace, string $name, string $locale, string $content)
     {
         $this->namespace = $namespace;
         $this->name = $name;
@@ -53,66 +47,32 @@ class DoctrineEntity
         $this->content = $content;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getNamespace()
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function getNamespace(): string
     {
         return $this->namespace;
     }
 
-    /**
-     * @param mixed $namespace
-     */
-    public function setNamespace($namespace)
-    {
-        $this->namespace = $namespace;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param mixed $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getLocale()
+    public function getLocale(): string
     {
         return $this->locale;
     }
 
-    /**
-     * @param mixed $locale
-     */
-    public function setLocale($locale)
-    {
-        $this->locale = $locale;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getContent()
+    public function getContent(): string
     {
         return $this->content;
     }
 
-    /**
-     * @param mixed $content
-     */
-    public function setContent($content)
+    public function setContent(string $content): void
     {
         $this->content = $content;
     }

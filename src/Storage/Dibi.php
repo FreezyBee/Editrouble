@@ -6,63 +6,34 @@ use Dibi\Connection;
 use Dibi\DriverException;
 use Nette\Caching;
 
-/**
- * Class Dibi
- * @package FreezyBee\Editrouble\Storage
- */
 class Dibi extends BaseStorage implements IStorage
 {
-    const TABLE = 'editrouble_content';
+    private Connection $connection;
+    private string $tableName;
 
-    /**
-     * @var Connection
-     */
-    private $connection;
-
-    /**
-     * Doctrine constructor.
-     * @param Caching\IStorage $storage
-     * @param Connection $connection
-     */
-    public function __construct(Caching\IStorage $storage, Connection $connection)
+    public function __construct(string $tableName, Caching\IStorage $storage, Connection $connection)
     {
         parent::__construct($storage);
         $this->connection = $connection;
+        $this->tableName = $tableName;
     }
 
-    /**
-     * @param $name
-     * @param $params
-     * @return string|false
-     */
-    public function getContent($name, $params)
+    public function getContent(string $name, array $params): string
     {
         $names = $this->decodeNames($name);
-        $locale = (isset($params['locale'])) ? $params['locale'] : '';
+        $locale = $params['locale'] ?? '';
 
         $records = $this->loadCachedNamespace($names->namespace);
 
-        if (isset($records[$names->namespace][$names->name][$locale])) {
-            return $records[$names->namespace][$names->name][$locale];
-        } else {
-            return $this->findContentAndFillCache($names->namespace, $names->name, $locale);
-        }
+        return $records[$names->namespace][$names->name][$locale] ?? $this->findContentAndFillCache($names->namespace, $names->name, $locale);
     }
 
-    /**
-     * @param $namespace
-     * @param $name
-     * @param $locale
-     * @return string
-     * @throws DriverException
-     */
-    private function findContentAndFillCache($namespace, $name, $locale)
+    private function findContentAndFillCache(string $namespace, string $name, string $locale): string
     {
         try {
-            /** @var array $result */
             $result = $this->connection
                 ->select('*')
-                ->from(self::TABLE)
+                ->from($this->tableName)
                 ->where(['namespace%s' => $namespace])
                 ->fetchAll();
         } catch (DriverException $e) {
@@ -70,7 +41,7 @@ class Dibi extends BaseStorage implements IStorage
             if ($e->getCode() == 1146) {
                 $this->connection
                     ->query('
-                      CREATE TABLE [' . self::TABLE . '] (
+                      CREATE TABLE %n (
                       [id] int(11) NOT NULL AUTO_INCREMENT,
                       [namespace] varchar(255) NOT NULL,
                       [name] varchar(255) NOT NULL,
@@ -78,7 +49,7 @@ class Dibi extends BaseStorage implements IStorage
                       [content] text NOT NULL,
                       PRIMARY KEY ([id]),
                       UNIQUE KEY [uniq_record] ([namespace],[name],[locale])
-                    );');
+                    );', $this->tableName);
 
                 $result = [];
             } else {
@@ -98,21 +69,17 @@ class Dibi extends BaseStorage implements IStorage
 
         $this->saveCachedNamespace($namespace, $tmp);
 
-        return isset($tmp[$namespace][$name][$locale]) ? $tmp[$namespace][$name][$locale] : '';
+        return $tmp[$namespace][$name][$locale] ?? '';
     }
 
-    /**
-     * @param $name
-     * @param $params
-     */
-    public function saveContent($name, $params)
+    public function saveContent(string $name, array $params): void
     {
         $names = $this->decodeNames($name);
-        $locale = (isset($params->locale)) ? $params->locale : '';
+        $locale = $params['locale'] ?? '';
 
         $rowId = $this->connection
             ->select('id')
-            ->from(self::TABLE)
+            ->from($this->tableName)
             ->where([
                 'namespace' => $names->namespace,
                 'name' => $names->name,
@@ -120,19 +87,19 @@ class Dibi extends BaseStorage implements IStorage
             ])
             ->fetchSingle();
 
-        $content = isset($params->content) ? $params->content : '';
+        $content = $params['content'] ?? '';
 
         if ($rowId) {
             // update
             $this->connection
-                ->update(self::TABLE, ['content' => $content])
+                ->update($this->tableName, ['content' => $content])
                 ->where(['id' => $rowId])
                 ->execute();
 
         } else {
             // new
             $this->connection
-                ->insert(self::TABLE, [
+                ->insert($this->tableName, [
                     'namespace' => $names->namespace,
                     'name' => $names->name,
                     'locale' => $locale,

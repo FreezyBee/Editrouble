@@ -6,38 +6,21 @@ use FreezyBee\Editrouble\Storage\IStorage;
 use Nette\Application\UI\Presenter;
 use Nette\SmartObject;
 
-/**
- * Class Connector
- * @package FreezyBee\Editrouble
- */
 class Connector
 {
     use SmartObject;
 
-    /**
-     * @var IStorage
-     */
-    private $storage;
+    private IStorage $storage;
+
+    private Presenter $presenter;
+
+    /** @var mixed[] */
+    private array $config;
+
+    private string $locale;
 
     /**
-     * @var Presenter
-     */
-    private $presenter;
-
-    /**
-     * @var array
-     */
-    private $config;
-
-    /**
-     * @var string
-     */
-    private $locale;
-
-    /**
-     * Connector constructor.
-     * @param IStorage $storage
-     * @param array $config
+     * @param mixed[] $config
      */
     public function __construct(IStorage $storage, array $config)
     {
@@ -45,52 +28,38 @@ class Connector
         $this->config = $config;
     }
 
-    /**
-     * @param Presenter $presenter
-     */
-    public function setPresenter(Presenter $presenter)
+    public function setPresenter(Presenter $presenter): void
     {
         $this->presenter = $presenter;
     }
 
-    /**
-     * @param $locale
-     */
-    public function setLocale($locale)
+    public function setLocale(string $locale): void
     {
         $this->locale = $locale;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getLocale()
+    public function getLocale(): string
     {
         return $this->locale;
     }
 
-    /**
-     * @return IStorage
-     */
-    public function getStorage()
+    public function getStorage(): IStorage
     {
         return $this->storage;
     }
 
     /**
-     * @return array
+     * @return mixed[]
      */
-    public function getConfig()
+    public function getConfig(): array
     {
         return $this->config;
     }
 
     /**
-     * @param $name
-     * @param array $params
-     * @return mixed
+     * @param mixed[] $params
      */
-    public function getContent($name, array $params = [])
+    public function getContent(string $name, array $params = []): string
     {
         if ($this->locale && !isset($params['locale'])) {
             $params['locale'] = $this->locale;
@@ -99,10 +68,7 @@ class Connector
         return $this->storage->getContent($name, $params);
     }
 
-    /**
-     * @return bool
-     */
-    public function checkPermission()
+    public function checkPermission(): bool
     {
         foreach ($this->presenter->user->getRoles() as $role) {
             if (in_array($role, $this->config['roles'])) {

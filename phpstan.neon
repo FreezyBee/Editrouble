@@ -1,0 +1,3 @@
+parameters:
+    ignoreErrors:
+        - '#Nette\\Application\\UI\\ITemplate\|stdClass#'

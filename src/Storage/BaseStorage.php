@@ -5,67 +5,45 @@ namespace FreezyBee\Editrouble\Storage;
 use Nette\Caching\Cache;
 use Nette\Caching\IStorage;
 use Nette\SmartObject;
+use stdClass;
 
-/**
- * Class BaseStorage
- * @package FreezyBee\Editrouble\Storage
- */
 abstract class BaseStorage
 {
     use SmartObject;
 
-    /**
-     * @var Cache
-     */
-    protected $cache;
+    protected Cache $cache;
 
-    /**
-     * @var array
-     */
-    protected $loadedData;
+    /** @var mixed[] */
+    protected array $loadedData;
 
-    /**
-     * BaseStorage constructor.
-     * @param IStorage $cacheStorage
-     */
     public function __construct(IStorage $cacheStorage)
     {
         $this->cache = new Cache($cacheStorage, 'editrouble');
     }
 
     /**
-     * @param $namespace
-     * @return array
+     * @return mixed[]
      */
-    public function loadCachedNamespace($namespace)
+    public function loadCachedNamespace(string $namespace): array
     {
-        if (isset($this->loadedData[$namespace])) {
-            return $this->loadedData[$namespace];
-        } else {
-            return $this->loadedData[$namespace] = $this->cache->load($namespace);
-        }
+        return $this->loadedData[$namespace] ?? ($this->loadedData[$namespace] = $this->cache->load($namespace) ?? []);
     }
 
     /**
-     * @param $namespace
-     * @param $data
-     * @return array
+     * @param mixed[] $data
+     * @return mixed[]
      */
-    public function saveCachedNamespace($namespace, $data)
+    public function saveCachedNamespace(string $namespace, array $data): array
     {
         return $this->cache->save($namespace, $data);
     }
 
-    /**
-     * @param $name
-     * @return \stdClass
-     */
-    protected function decodeNames($name)
+    protected function decodeNames(string $name): stdClass
     {
         $names = explode('_', $name);
         $count = count($names);
 
-        $result = new \stdClass;
+        $result = new stdClass;
 
         if ($count == 1) {
             $result->namespace = '';

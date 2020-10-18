@@ -2,27 +2,21 @@
 
 namespace FreezyBee\Editrouble\DI;
 
-use Kdyby\Doctrine\DI\IEntityProvider;
+use FreezyBee\Editrouble\Connector;
+use FreezyBee\Editrouble\Storage\Dibi;
+use FreezyBee\Editrouble\Storage\Doctrine;
 use Nette\DI\CompilerExtension;
+use Nette\DI\Definitions\FactoryDefinition;
+use Nette\Schema\Helpers;
 use Nette\Utils\AssertionException;
 use Nette\Utils\Validators;
-use FreezyBee\Editrouble\Connector;
 
-if (!interface_exists('Kdyby\Doctrine\DI\IEntityProvider')) {
-    class_alias('FreezyBee\Editrouble\DI\IFakeEntityProvider', 'Kdyby\Doctrine\DI\IEntityProvider');
-}
-
-/**
- * Class EditroubleExtension
- * @package FreezyBee\MailChimp\DI
- */
-class EditroubleExtension extends CompilerExtension implements IEntityProvider
+class EditroubleExtension extends CompilerExtension
 {
-    /**
-     * @var array
-     */
-    private $defaults = [
+    /** @var mixed[] */
+    protected $defaults = [
         'storage' => null,
+        'tableName' => 'editrouble_content',
         'roles' => [
             'editor'
         ],
@@ -32,51 +26,43 @@ class EditroubleExtension extends CompilerExtension implements IEntityProvider
         ]
     ];
 
-    /**
-     * @var array
-     */
-    private static $allowedStorages = [
-        'doctrine',
-//        'ndb',
-        'dibi'
-    ];
+    /** @var string[] */
+    private static array $allowedStorages = ['doctrine', 'dibi'];
 
-    /**
-     * @throws AssertionException
-     */
-    public function loadConfiguration()
+    public function loadConfiguration(): void
     {
-        $config = $this->getConfig($this->defaults);
+        /** @var mixed[] $config */
+        $config = Helpers::merge($this->getConfig(), $this->defaults);
 
         Validators::assert($config['storage'], 'string', 'Editrouble - missing storage');
-
-        if (!in_array($config['storage'], self::$allowedStorages, true)) {
-            throw new AssertionException('Editrouble - invalid storage - it must be (' .
-                implode(' OR ', self::$allowedStorages) . ')');
-        }
-
         Validators::assert($config['roles'], 'array', 'Editrouble - invalid roles');
 
         $builder = $this->getContainerBuilder();
-        $builder->getDefinition('nette.latteFactory')
+
+        /** @var FactoryDefinition $def */
+        $def = $builder->getDefinition('nette.latteFactory');
+        $def->getResultDefinition()
             ->addSetup('?->onCompile[] = function (\Latte\Engine $engine) {
             FreezyBee\Editrouble\Macros::install($engine->getCompiler());
             }', ['@self']);
 
-        $storage = $builder->addDefinition($this->prefix('storage'))
-            ->setClass('FreezyBee\Editrouble\Storage\\' . ucfirst($config['storage']));
+        $storage = $builder->addDefinition($this->prefix('storage'));
+
+        switch ($config['storage']) {
+            case 'dibi':
+                $storage->setType(Dibi::class)
+                    ->setArgument('tableName', $config['tableName']);
+                break;
+            case 'doctrine':
+                $storage->setType(Doctrine::class);
+                break;
+            default:
+                throw new AssertionException(
+                    'Editrouble - invalid storage - it must be (doctrine or dibi)');
+        }
 
         $builder->addDefinition($this->prefix('connector'))
-            ->setClass(Connector::class)
+            ->setType(Connector::class)
             ->setArguments([$storage, $config]);
-    }
-
-    /**
-     * Returns associative array of Namespace => mapping definition
-     * @return array
-     */
-    public function getEntityMappings()
-    {
-        return ['FreezyBee\Editrouble\Storage' => __DIR__ . '/../Storage/'];
     }
 }
